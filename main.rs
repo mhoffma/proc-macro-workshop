@@ -1,59 +1,23 @@
-// Have the macro produce a struct for the builder state, and a `builder`
-// function that creates an empty instance of the builder.
+// Now construct the generated code! Produce the output TokenStream by repeating
+// the loop body the correct number of times as specified by the loop bounds and
+// replacing the specified identifier with the loop counter.
 //
-// As a quick start, try generating the following code (but make sure the type
-// name matches what is in the caller's input).
+// The invocation below will need to expand to a TokenStream containing:
 //
-//     impl Command {
-//         pub fn builder() {}
-//     }
+//     compile_error!(concat!("error number ", stringify!(0)));
+//     compile_error!(concat!("error number ", stringify!(1)));
+//     compile_error!(concat!("error number ", stringify!(2)));
+//     compile_error!(concat!("error number ", stringify!(3)));
 //
-// At this point the test should pass because it isn't doing anything with the
-// builder yet, so `()` as the builder type is as good as any other.
-//
-// Before moving on, have the macro also generate:
-//
-//     pub struct CommandBuilder {
-//         executable: Option<String>,
-//         args: Option<Vec<String>>,
-//         env: Option<Vec<String>>,
-//         current_dir: Option<String>,
-//     }
-//
-// and in the `builder` function:
-//
-//     impl Command {
-//         pub fn builder() -> CommandBuilder {
-//             CommandBuilder {
-//                 executable: None,
-//                 args: None,
-//                 env: None,
-//                 current_dir: None,
-//             }
-//         }
-//     }
-//
-//
-// Resources:
-//
-//   - The Quote crate for putting together output from a macro:
-//     https://github.com/dtolnay/quote
-//
-//   - Joining together the type name + "Builder" to make the builder's name:
-//     https://docs.rs/syn/2.0/syn/struct.Ident.html
+// This test is written as a compile_fail test because our macro isn't yet
+// powerful enough to do anything useful. For example if we made it generate
+// something like a function, every one of those functions would have the same
+// name and the program would not compile.
 
-use derive_builder::Builder;
+use seq::seq;
 
-#[derive(Builder)]
-pub struct Command {
-    executable: String,
-    args: Vec<String>,
-    env: Vec<String>,
-    current_dir: String,
-}
+seq!(N in 0..4 {
+    compile_error!(concat!("error number ", stringify!(N)));
+});
 
-fn main() {
-    let builder = Command::builder();
-
-    let _ = builder;
-}
+fn main() {}

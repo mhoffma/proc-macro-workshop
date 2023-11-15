@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
-
+use proc_macro2;
 use quote::quote;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{parse_macro_input, Block, Expr, Ident, LitInt, Token};
+use syn::{parse_macro_input, Block, Ident, LitInt, Token};
 
 #[derive(Debug)]
 struct Seq {
@@ -19,7 +19,6 @@ impl Parse for Seq {
         let lstart: LitInt = input.parse()?;
         input.parse::<Token![..]>()?;
         let lend: LitInt = input.parse()?;
-        //let e: Expr = input.parse()?;
         let body: Block = input.parse()?;
         let start: i32 = lstart.base10_parse()?;
         let end: i32 = lend.base10_parse()?;
@@ -35,13 +34,12 @@ impl Parse for Seq {
 #[proc_macro]
 pub fn seq(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as Seq);
-    eprintln!("{:#?}", ast);
-    let n = ast.name;
+    let _n = ast.name;
     let b = ast.body;
-    let mut tt = TokenStream::new();
-    for c in ast.start..ast.end {
-        eprintln!("{}", c);
-        tt = quote!(#tt  let #n = #c;  #b).into();
-    }
-    tt
+    let mut tt = proc_macro2::TokenStream::new();
+    let rep = (ast.start..ast.end).map(|_c| quote!(#b;));
+    tt.extend(rep);
+    //eprintln!("{:#?}", tt);
+
+    tt.into()
 }
